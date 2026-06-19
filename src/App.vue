@@ -1,11 +1,19 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue/usetoast'
+import AppNavigation from './components/AppNavigation.vue'
+import { initPopupService } from './services/popupService.ts'
+
+initPopupService(useToast())
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <AppNavigation />
+
+  <main class="page">
+    <Toast />
+    <RouterView />
+  </main>
 </template>
 
 <style scoped></style>
