@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --color-bg: #0b0e14;
+  --color-surface: #12161f;
+  --color-surface-raised: #171c28;
+  --color-border: #222836;
+  --color-border-subtle: #1a1f2b;
+
+  --color-text-primary: #e8eaed;
+  --color-text-secondary: #8b92a3;
+  --color-text-tertiary: #5a6173;
+
+  --color-accent: #5b8def;
+  --color-accent-soft: rgba(91, 141, 239, 0.12);
+
+  --color-positive: #34d399;
+  --color-positive-bg: rgba(52, 211, 153, 0.1);
+  --color-negative: #f87171;
+  --color-negative-bg: rgba(248, 113, 113, 0.1);
+
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-feature-settings:
+    'tnum' on,
+    'lnum' on;
+  margin: 0;
+}
+
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+}
+
+.p-toast-close-button:focus,
+.p-toast-close-button:focus-visible,
+.p-toast-message-close-button:focus,
+.p-toast-message-close-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
