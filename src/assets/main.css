@@ -47,6 +47,10 @@ body {
   padding: 0 1.5rem 3rem;
 }
 
+.page-container {
+  margin-top: 2rem;
+}
+
 .p-toast-close-button:focus,
 .p-toast-close-button:focus-visible,
 .p-toast-message-close-button:focus,
