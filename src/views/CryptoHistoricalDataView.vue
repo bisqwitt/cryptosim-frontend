@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CryptoChart from '@/components/CryptoChart.vue'
+import CryptoChart from '@/components/crypto/CryptoChart.vue'
 </script>
 
 <template>

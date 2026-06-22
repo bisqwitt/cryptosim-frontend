@@ -8,7 +8,12 @@ const items = [
   {
     label: 'Market',
     icon: 'pi pi-bitcoin',
-    command: () => router.push('/market'),
+    command: () => router.push('/crypto/market'),
+  },
+  {
+    label: 'Portfolios',
+    icon: 'pi pi-briefcase',
+    command: () => router.push('/portfolios'),
   },
 ]
 </script>
