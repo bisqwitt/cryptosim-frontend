@@ -9,14 +9,19 @@ const router = createRouter({
       component: () => import('../views/CryptoMarketDataView.vue'),
     },
     {
-      path: '/market',
+      path: '/crypto/market',
       name: 'market',
       component: () => import('../views/CryptoMarketDataView.vue'),
     },
     {
-      path: '/:id/chart',
+      path: '/crypto/:id/chart',
       name: 'crypto-chart',
       component: () => import('../views/CryptoHistoricalDataView.vue'),
+    },
+    {
+      path: '/portfolios',
+      name: 'portfolios',
+      component: () => import('../views/PortfolioListView.vue'),
     },
   ],
 })

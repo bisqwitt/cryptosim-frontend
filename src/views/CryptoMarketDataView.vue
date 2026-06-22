@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CryptoMarketDataTable from '@/components/CryptoMarketDataTable.vue'
+import CryptoMarketDataTable from '@/components/crypto/CryptoMarketDataTable.vue'
 </script>
 
 <template>
