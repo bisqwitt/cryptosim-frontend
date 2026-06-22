@@ -1,17 +1,27 @@
 <script setup lang="ts">
 import { getCryptoOverview } from '@/api/cryptoApi'
-import type { CryptoMarketDataDto } from '@/types/CryptoMarketDataDto'
+import type { CryptoMarketData } from '@/types/CryptoMarketData'
 import { formatCurrency, formatName, formatPercentage } from '@/utils/formatters'
 import { getChangePerformanceClass } from '@/utils/styleHelpers'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-const marketData = ref<CryptoMarketDataDto[]>([])
-
+const marketData = ref<CryptoMarketData[]>([])
 onMounted(async () => {
   marketData.value = await getCryptoOverview()
 })
+
+const router = useRouter()
+function openChart(event: { data: CryptoMarketData }) {
+  router.push({
+    name: 'crypto-chart',
+    params: {
+      id: event.data.id,
+    },
+  })
+}
 </script>
 
 <template>
@@ -27,7 +37,13 @@ onMounted(async () => {
       <p class="subtitle">Real-time prices across top crypto assets</p>
     </div>
 
-    <DataTable :value="marketData" stripedRows tableStyle="min-width: 50rem" class="market-table">
+    <DataTable
+      :value="marketData"
+      stripedRows
+      tableStyle="min-width: 50rem"
+      class="market-table"
+      @row-click="openChart"
+    >
       <Column field="coin" header="Crypto" sortable>
         <template #body="{ data }">
           <span class="asset-name">{{ formatName(data.name, data.symbol) }}</span>
@@ -36,7 +52,7 @@ onMounted(async () => {
 
       <Column field="currentPrice" header="Price" sortable bodyClass="col-numeric">
         <template #body="{ data }">
-          <span class="numeric">{{ formatCurrency(data.current_price) }}</span>
+          <span class="numeric">{{ formatCurrency(data.currentPrice) }}</span>
         </template>
       </Column>
 
@@ -44,9 +60,9 @@ onMounted(async () => {
         <template #body="{ data }">
           <span
             class="change-pill"
-            :class="getChangePerformanceClass(data.price_change_percentage_24h)"
+            :class="getChangePerformanceClass(data.priceChangePercentage24h)"
           >
-            {{ formatPercentage(data.price_change_percentage_24h) }}
+            {{ formatPercentage(data.priceChangePercentage24h) }}
           </span>
         </template>
       </Column>
@@ -55,22 +71,22 @@ onMounted(async () => {
         <template #body="{ data }">
           <span
             class="change-pill"
-            :class="getChangePerformanceClass(data.price_change_percentage_7d_in_currency)"
+            :class="getChangePerformanceClass(data.priceChangePercentage7d)"
           >
-            {{ formatPercentage(data.price_change_percentage_7d_in_currency) }}
+            {{ formatPercentage(data.priceChangePercentage7d) }}
           </span>
         </template>
       </Column>
 
       <Column field="marketCap" header="Market Cap" sortable bodyClass="col-numeric">
         <template #body="{ data }">
-          <span class="numeric numeric-secondary">{{ formatCurrency(data.market_cap) }}</span>
+          <span class="numeric numeric-secondary">{{ formatCurrency(data.marketCap) }}</span>
         </template>
       </Column>
 
       <Column field="volume24h" header="Volume 24h" sortable bodyClass="col-numeric">
         <template #body="{ data }">
-          <span class="numeric numeric-secondary">{{ formatCurrency(data.total_volume) }}</span>
+          <span class="numeric numeric-secondary">{{ formatCurrency(data.totalVolume) }}</span>
         </template>
       </Column>
     </DataTable>
@@ -82,7 +98,6 @@ onMounted(async () => {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  margin-top: 2rem;
   overflow: hidden;
 }
 
@@ -200,6 +215,7 @@ onMounted(async () => {
 .market-table :deep(.p-datatable-tbody > tr) {
   background: var(--color-surface);
   transition: background 0.12s ease;
+  cursor: pointer;
 }
 
 .market-table :deep(.p-datatable-tbody > tr.p-datatable-striped-row) {

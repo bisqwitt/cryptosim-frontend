@@ -13,6 +13,11 @@ const router = createRouter({
       name: 'market',
       component: () => import('../views/CryptoMarketDataView.vue'),
     },
+    {
+      path: '/:id/chart',
+      name: 'crypto-chart',
+      component: () => import('../views/CryptoHistoricalDataView.vue'),
+    },
   ],
 })
 
