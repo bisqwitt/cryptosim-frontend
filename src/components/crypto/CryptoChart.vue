@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCrypto, getHistoricalCryptoData } from '@/api/cryptoApi'
+import { getCryptoMarketData, getHistoricalCryptoData } from '@/api/cryptoApi'
 import type { CryptoHistoricalData } from '@/types/CryptoHistoricalData'
 import type { CryptoHistoricalDataPoint } from '@/types/CryptoHistoricalDataPoint'
 import type { CryptoMarketData } from '@/types/CryptoMarketData'
@@ -27,7 +27,7 @@ const historicalData = ref<CryptoHistoricalData>({
 
 onMounted(async () => {
   const id = route.params.id as string
-  cryptoData.value = await getCrypto(id)
+  cryptoData.value = await getCryptoMarketData(id)
   historicalData.value = await getHistoricalCryptoData(id)
 })
 

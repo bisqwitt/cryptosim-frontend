@@ -26,3 +26,19 @@ export function formatPercentage(value: number | null): string {
   const sign = value > 0 ? '+' : ''
   return `${sign}${value.toFixed(2)}%`
 }
+
+export function formatUsd(value: number, options: Intl.NumberFormatOptions = {}): string {
+  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD', ...options })
+}
+
+export function formatPrice(value: number): string {
+  return formatUsd(value, { maximumFractionDigits: value < 10 ? 6 : 2 })
+}
+
+export function formatCrypto(value: number): string {
+  return value.toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })
+}
+
+export function formatDate(value: Date): string {
+  return value.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}

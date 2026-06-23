@@ -4,9 +4,11 @@ import type { CryptoMarketData } from '@/types/CryptoMarketData'
 import { formatCurrency, formatName, formatPercentage } from '@/utils/formatters'
 import { getChangePerformanceClass } from '@/utils/styleHelpers'
 import Column from 'primevue/column'
+import type { DataTableRowClickEvent } from 'primevue/datatable'
 import DataTable from 'primevue/datatable'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import CreateTransactionDialog from '../transaction/CreateTransactionDialog.vue'
 
 const marketData = ref<CryptoMarketData[]>([])
 onMounted(async () => {
@@ -14,13 +16,27 @@ onMounted(async () => {
 })
 
 const router = useRouter()
-function openChart(event: { data: CryptoMarketData }) {
+
+function openChart(event: DataTableRowClickEvent) {
+  const target = event.originalEvent.target as HTMLElement
+  if (target.closest('.action-btn')) return
+
   router.push({
     name: 'crypto-chart',
     params: {
-      id: event.data.id,
+      id: (event.data as CryptoMarketData).id,
     },
   })
+}
+
+const transactionVisible = ref(false)
+const transactionType = ref<'BUY' | 'SELL'>('BUY')
+const selectedCryptoId = ref<string>('')
+
+function openTransaction(type: 'BUY' | 'SELL', cryptoId: string) {
+  transactionType.value = type
+  selectedCryptoId.value = cryptoId
+  transactionVisible.value = true
 }
 </script>
 
@@ -89,8 +105,27 @@ function openChart(event: { data: CryptoMarketData }) {
           <span class="numeric numeric-secondary">{{ formatCurrency(data.totalVolume) }}</span>
         </template>
       </Column>
+
+      <Column header="" bodyClass="col-actions">
+        <template #body="{ data }">
+          <div class="row-actions">
+            <button class="action-btn action-buy" @click.stop="openTransaction('BUY', data.id)">
+              ↑ Buy
+            </button>
+            <button class="action-btn action-sell" @click.stop="openTransaction('SELL', data.id)">
+              ↓ Sell
+            </button>
+          </div>
+        </template>
+      </Column>
     </DataTable>
   </div>
+  <CreateTransactionDialog
+    v-model:visible="transactionVisible"
+    v-model:type="transactionType"
+    :cryptoId="selectedCryptoId"
+    @created="() => {}"
+  />
 </template>
 
 <style scoped>
@@ -234,5 +269,61 @@ function openChart(event: { data: CryptoMarketData }) {
 
 .market-table :deep(.col-numeric) {
   text-align: left;
+}
+
+.market-table :deep(.col-actions) {
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+  padding-right: 1.75rem;
+}
+
+.market-table :deep(th:last-child),
+.market-table :deep(td:last-child) {
+  width: 0;
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
+.row-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.market-table :deep(.p-datatable-tbody > tr:hover) .row-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease;
+}
+
+.action-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.action-buy {
+  color: var(--color-positive);
+  background: var(--color-positive-bg);
+  border-color: transparent;
+}
+
+.action-sell {
+  color: var(--color-negative);
+  background: var(--color-negative-bg);
+  border-color: transparent;
 }
 </style>
