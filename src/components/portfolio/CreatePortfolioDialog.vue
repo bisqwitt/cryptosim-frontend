@@ -2,6 +2,7 @@
 import { createPortfolio } from '@/api/portfolioApi'
 import { showSuccess } from '@/services/popupService'
 import type { Portfolio } from '@/types/Portfolio'
+import { validatePortfolioName } from '@/utils/validations'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
@@ -23,30 +24,14 @@ const inlineError = ref({
 })
 
 function validate(): boolean {
-  inlineError.value.name = ''
-
-  if (!newPortfolio.value.name.trim()) {
-    inlineError.value.name = 'Name is required.'
-    return false
-  }
-
-  if (newPortfolio.value.name.trim().length < 2) {
-    inlineError.value.name = 'Name must be at least 2 characters.'
-    return false
-  }
-
-  if (newPortfolio.value.name.trim().length > 25) {
-    inlineError.value.name = 'Max length is 25 characters'
-    return false
-  }
-
-  return true
+  inlineError.value.name = validatePortfolioName(newPortfolio.value.name)
+  return !inlineError.value.name
 }
 
 async function createNewPortfolio() {
   if (!validate()) return
 
-  const portfolio = await createPortfolio(newPortfolio.value.name, newPortfolio.value.credit)
+  const portfolio = await createPortfolio(newPortfolio.value.name.trim(), newPortfolio.value.credit)
 
   emit('created', portfolio)
   showSuccess('Portfolio created', `"${portfolio.name}" has been created successfully`)

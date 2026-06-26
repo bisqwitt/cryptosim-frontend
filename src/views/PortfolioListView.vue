@@ -43,7 +43,14 @@ function addPortfolio(portfolio: Portfolio) {
     </div>
 
     <section v-else class="portfolio-grid">
-      <PortfolioCard v-for="portfolio in portfolios" :key="portfolio.id" :portfolio="portfolio" />
+      <RouterLink
+        v-for="portfolio in portfolios"
+        :key="portfolio.id"
+        :to="{ name: 'portfolio', params: { id: portfolio.id } }"
+        class="portfolio-card-link"
+      >
+        <PortfolioCard :portfolio="portfolio" />
+      </RouterLink>
     </section>
 
     <CreatePortfolioDialog v-model:visible="createDialogVisible" @created="addPortfolio" />
@@ -113,5 +120,23 @@ function addPortfolio(portfolio: Portfolio) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1rem;
+}
+
+/* Card link wrapper - strip default anchor styling so the card looks unchanged */
+.portfolio-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  border-radius: var(--radius-lg);
+  transition: transform 0.15s ease;
+}
+
+.portfolio-card-link:hover {
+  transform: translateY(-2px);
+}
+
+.portfolio-card-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 </style>

@@ -6,13 +6,32 @@ import { getChangePerformanceClass } from '@/utils/styleHelpers'
 import Column from 'primevue/column'
 import type { DataTableRowClickEvent } from 'primevue/datatable'
 import DataTable from 'primevue/datatable'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import CreateTransactionDialog from '../transaction/CreateTransactionDialog.vue'
 
 const marketData = ref<CryptoMarketData[]>([])
+const lastUpdated = ref<Date | null>(null)
+const now = ref(Date.now())
+
 onMounted(async () => {
   marketData.value = await getCryptoOverview()
+  lastUpdated.value = new Date()
+})
+
+// Tick every 10s so the relative label stays current without re-fetching.
+const ticker = setInterval(() => (now.value = Date.now()), 1_000)
+onUnmounted(() => clearInterval(ticker))
+
+const lastUpdatedLabel = computed(() => {
+  if (!lastUpdated.value) return ''
+  const seconds = Math.floor((now.value - lastUpdated.value.getTime()) / 1000)
+  if (seconds < 10) return 'just now'
+  if (seconds < 60) return `${seconds} sec ago`
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes} min ago`
+  const hours = Math.floor(minutes / 60)
+  return `${hours}h ago`
 })
 
 const router = useRouter()
@@ -45,9 +64,9 @@ function openTransaction(type: 'BUY' | 'SELL', cryptoId: string) {
     <div class="table-card-header">
       <div class="title-group">
         <h1>Market</h1>
-        <span class="live-badge">
-          <span class="live-dot"></span>
-          Live
+        <span v-if="lastUpdated" class="update-badge">
+          <span class="status-dot"></span>
+          Updated {{ lastUpdatedLabel }}
         </span>
       </div>
       <p class="subtitle">Real-time prices across top crypto assets</p>
@@ -154,7 +173,7 @@ function openTransaction(type: 'BUY' | 'SELL', cryptoId: string) {
   margin: 0;
 }
 
-.live-badge {
+.update-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -162,28 +181,17 @@ function openTransaction(type: 'BUY' | 'SELL', cryptoId: string) {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-positive);
-  background: var(--color-positive-bg);
+  color: var(--color-text-tertiary);
+  background: var(--color-surface-raised);
   padding: 0.25rem 0.55rem;
   border-radius: 999px;
 }
 
-.live-dot {
+.status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--color-positive);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
 }
 
 .subtitle {

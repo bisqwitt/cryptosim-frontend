@@ -23,6 +23,12 @@ const router = createRouter({
       name: 'portfolios',
       component: () => import('../views/PortfolioListView.vue'),
     },
+    {
+      path: '/portfolios/:id',
+      name: 'portfolio',
+      component: () => import('../views/PortfolioDetailsView.vue'),
+      props: (route) => ({ portfolioId: Number(route.params.id) }),
+    },
   ],
 })
 
