@@ -3,6 +3,7 @@ export interface Transaction {
   portfolioId: number
   cryptoId: number
   amountUsd: number
+  amountCrypto: number
   type: 'BUY' | 'SELL'
   date: Date
 }

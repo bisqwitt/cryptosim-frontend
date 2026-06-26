@@ -1,5 +1,6 @@
 import type { HoldingOfPosition } from '@/types/HoldingOfPosition'
 import type { Portfolio } from '@/types/Portfolio'
+import type { PortfolioDetails } from '@/types/PortfolioDetails'
 import api from './axios'
 
 export async function getAllPortfolios(): Promise<Portfolio[]> {
@@ -12,6 +13,23 @@ export async function createPortfolio(name: string, credit: number): Promise<Por
     name,
     credit,
   })
+  return response.data
+}
+
+export async function updatePortfolio(id: number, newName: string): Promise<Portfolio> {
+  const response = await api.patch<Portfolio>(`/portfolio/${id}`, {
+    newName,
+  })
+  return response.data
+}
+
+export async function deletePortfolio(id: number): Promise<void> {
+  const response = await api.delete(`/portfolio/${id}`)
+  return response.data
+}
+
+export async function getPortfolioDetails(id: number) {
+  const response = await api.get<PortfolioDetails>(`/portfolio/${id}`)
   return response.data
 }
 

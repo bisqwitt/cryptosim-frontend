@@ -5,6 +5,8 @@ import { createTransaction } from '@/api/transactionApi'
 import type { HoldingOfPosition } from '@/types/HoldingOfPosition'
 import { formatCrypto, formatDate, formatPrice, formatUsd } from '@/utils/formatters'
 import {
+  buyLimit,
+  sellLimit,
   validateAmount,
   validateDate,
   validatePortfolio,
@@ -29,6 +31,7 @@ const type = defineModel<TransactionType>('type')
 
 const props = defineProps<{
   cryptoId: string
+  initialDate?: Date
 }>()
 
 const emit = defineEmits<{
@@ -60,6 +63,16 @@ function isToday(d: Date): boolean {
 
 const portfolioError = computed(() => validatePortfolio(portfolioId.value, submitAttempted.value))
 const dateError = computed(() => validateDate(date.value, submitAttempted.value))
+
+watch(
+  () => visible.value,
+  (isOpen) => {
+    if (isOpen) {
+      date.value = props.initialDate ? new Date(props.initialDate) : new Date()
+      submitAttempted.value = false
+    }
+  },
+)
 
 /* ------------------------------------------------------------------ *
  * Price - fetched while the dialog is open and the date is valid.     *
@@ -130,17 +143,9 @@ watch(
   { immediate: true },
 )
 
-/* ------------------------------------------------------------------ *
- * Amount validation - limit depends on transaction type.             *
- * ------------------------------------------------------------------ */
-const amountLimit = computed<AmountLimit | null>(() => {
-  if (type.value === 'SELL') {
-    return holding.value ? { max: holding.value.value, message: 'Not enough holdings' } : null
-  }
-  return selectedPortfolio.value
-    ? { max: selectedPortfolio.value.credit, message: 'Not enough credit' }
-    : null
-})
+const amountLimit = computed<AmountLimit | null>(() =>
+  type.value === 'SELL' ? sellLimit(holding.value) : buyLimit(selectedPortfolio.value),
+)
 
 const amountError = computed(() =>
   validateAmount(amountUsd.value, submitAttempted.value, amountLimit.value),

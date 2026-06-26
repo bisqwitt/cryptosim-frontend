@@ -3,11 +3,14 @@ import { getCryptoMarketData, getHistoricalCryptoData } from '@/api/cryptoApi'
 import type { CryptoHistoricalData } from '@/types/CryptoHistoricalData'
 import type { CryptoHistoricalDataPoint } from '@/types/CryptoHistoricalDataPoint'
 import type { CryptoMarketData } from '@/types/CryptoMarketData'
+import { formatDate } from '@/utils/formatters'
 import Chart from 'primevue/chart'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import CreateTransactionDialog from '../transaction/CreateTransactionDialog.vue'
 
 const route = useRoute()
+const cryptoId = route.params.id as string
 
 const cryptoData = ref<CryptoMarketData>({
   id: '',
@@ -26,9 +29,8 @@ const historicalData = ref<CryptoHistoricalData>({
 })
 
 onMounted(async () => {
-  const id = route.params.id as string
-  cryptoData.value = await getCryptoMarketData(id)
-  historicalData.value = await getHistoricalCryptoData(id)
+  cryptoData.value = await getCryptoMarketData(cryptoId)
+  historicalData.value = await getHistoricalCryptoData(cryptoId)
 })
 
 const rangeLabels: Record<RangeKey, string> = {
@@ -118,9 +120,30 @@ const chartData = computed(() => ({
   ],
 }))
 
+/* ------------------------------------------------------------------ *
+ * Transaktion - per Klick auf einen Chartpunkt ein Datum wählen und   *
+ * an den Dialog übergeben.                                            *
+ * ------------------------------------------------------------------ */
+const selectedDate = ref<Date | null>(null)
+const transactionVisible = ref(false)
+const transactionType = ref<'BUY' | 'SELL'>('BUY')
+
+function onChartPointClick(_event: unknown, elements: { index: number }[]) {
+  const first = elements[0]
+  if (!first) return
+  const point = filteredData.value[first.index]
+  if (point) selectedDate.value = new Date(point.timestamp)
+}
+
+function openTransaction(type: 'BUY' | 'SELL') {
+  transactionType.value = type
+  transactionVisible.value = true
+}
+
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  onClick: onChartPointClick,
   interaction: {
     mode: 'index',
     intersect: false,
@@ -196,10 +219,37 @@ const chartOptions = {
             {{ range }}
           </button>
         </div>
+
+        <div class="transaction-buttons">
+          <button type="button" class="tx-btn tx-btn--buy" @click="openTransaction('BUY')">
+            ↑ Buy
+          </button>
+          <button type="button" class="tx-btn tx-btn--sell" @click="openTransaction('SELL')">
+            ↓ Sell
+          </button>
+        </div>
       </div>
     </div>
 
+    <p class="selected-date-hint">
+      <template v-if="selectedDate">
+        Gewähltes Datum: <strong>{{ formatDate(selectedDate) }}</strong>
+        <button type="button" class="clear-date" @click="selectedDate = null">zurücksetzen</button>
+      </template>
+      <template v-else>
+        Klicke auf einen Punkt im Chart, um ein Datum zu wählen (sonst heute).
+      </template>
+    </p>
+
     <Chart type="line" :data="chartData" :options="chartOptions" style="height: 650px" />
+
+    <CreateTransactionDialog
+      v-model:visible="transactionVisible"
+      v-model:type="transactionType"
+      :cryptoId="cryptoId"
+      :initialDate="selectedDate ?? undefined"
+      @created="() => {}"
+    />
   </section>
 </template>
 
@@ -232,7 +282,8 @@ const chartOptions = {
 }
 
 .range-buttons,
-.metric-buttons {
+.metric-buttons,
+.transaction-buttons {
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -253,5 +304,49 @@ const chartOptions = {
   background: #2563eb;
   border-color: #2563eb;
   color: white;
+}
+
+.tx-btn {
+  font-weight: 600;
+  font-family: inherit;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease;
+}
+
+.tx-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.tx-btn--buy {
+  color: var(--color-positive);
+  background: var(--color-positive-bg);
+}
+
+.tx-btn--sell {
+  color: var(--color-negative);
+  background: var(--color-negative-bg);
+}
+
+.selected-date-hint {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #9ca3af);
+}
+
+.clear-date {
+  margin-left: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--color-accent, #2563eb);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
 }
 </style>
